@@ -109,15 +109,19 @@
 										opy (first y)
 										basey (first (rest y))
 										expoy (first (rest (rest y)))]
-										(cond (= opx 'POW) 
-											(cond (= opy 'POW)
+										(if (= basex basey)
+											(cond (= opx 'POW) 
+															(cond (= opy 'POW)
+																			
+																		(= opy '*)
 
-														(= opy '*)
+																		true (list '* x y)
+															)
+														(= opx '*)
 
 														true (list '* x y)
 											)
-													(= opx '*)
-										)
+										(list '* x y))
 										; LET THIS SERVE AS A REMINDER OF WHAT TO NEVER DO AGAIN
 										; (if (= opx 'POW) ;never nest if statements omg
 										; 	(if (= opy 'POW)
