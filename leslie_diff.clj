@@ -2,7 +2,7 @@
 (defn diff [e x]
 	(cond (number? e) 0
 		  (symbol? e) (if (= e x) 1 0)
-		  true (let [op (first e)
+		  :else (let [op (first e)
 					 u (first (rest e))
 					 v (if (= (count e) 3) (first (rest (rest e))) nil)]
 					 (cond (= op '+)(diffadd u v x)
@@ -38,7 +38,7 @@
 	(cond (number? x) 
 					(cond (number? y) (+ x y)
 								(= x 0) y
-								true (list '+ x y))
+								:else (list '+ x y))
 				(number? y) (if (= y 0) x)
 				(symbol? x) 
 					(cond (symbol? y) (if (= y x) (list '* 2 x) (list '+ x y))
@@ -48,8 +48,8 @@
 										two (if (= (count y) 3) (first (rest (rest y))) nil)]
 										(if (= op '+) (simplifyadd (simplifyadd x one) two))
 									)
-								true (list '+ x y))
-				true (list '+ x y)
+								:else (list '+ x y))
+				:else (list '+ x y)
 	)
 )
 
@@ -57,13 +57,13 @@
 	(cond (number? x)
 					(cond (number? y) (- x y)
 								(= x 0) (list '- y)
-								true (list '- x y))
+								:else (list '- x y))
 				(symbol? x) 
 					(cond (symbol? y) (if (= y x) 0 (list '- x y))
 								(number? y) (if (= y 0) x (list '- x y))
-								true (list '- x y)
+								:else (list '- x y)
 					)
-			  true (list '- x y)
+			  :else (list '- x y)
 	)
 )
 
@@ -85,10 +85,10 @@
 								 						(list '* (list '* x base) expo)
 							 						(= op '/)
 							 							(list '/ (simplifymult x base) expo)
-							 						true (list '* x y)
+							 						:else (list '* x y)
 								 		)
 								 	)
-								 true (list '* x y)
+								 :else (list '* x y)
 					)
 				(symbol? y) 
 					(if (list? x)
@@ -112,14 +112,14 @@
 										(if (= basex basey)
 											(cond (= opx 'POW) 
 															(cond (= opy 'POW)
-																			
+																			(list 'POW basex (simplifyadd expox expoy))
 																		(= opy '*)
-
-																		true (list '* x y)
+                                      (simplifymult x y)
+																		:else (list '* x y)
 															)
 														(= opx '*)
-
-														true (list '* x y)
+                              (simplifymult x y)
+														:else (list '* x y)
 											)
 										(list '* x y))
 										; LET THIS SERVE AS A REMINDER OF WHAT TO NEVER DO AGAIN
@@ -140,8 +140,8 @@
 									 					(if (= y base) (list '* ) (list '* x y))
 								 		)
 					 				)
-								true (list '* x y)) ;default for list? y
-				true (list '* x y) ;default for cond
+								:else (list '* x y)) ;default for list? y
+				:else (list '* x y) ;default for cond
 	)
 )
 
@@ -162,7 +162,7 @@
 				(number? x)
 					(cond (= x 0) 0
 								(number? y) (/ x y)
-								true (list '/ x y)
+								:else (list '/ x y)
 					)
 				
 				(list? x)
@@ -180,13 +180,13 @@
 																	(simplifypow basex (simplifysub expox expoy))
 																(> expoy expox)
 																	(simplifydiv 1 (simplifypow basey (simplifysub expoy expox)))
-																true (list '/ x y)
+																:else (list '/ x y)
 													)
 													(list '/ x y)
 												)
 											(= opx '*) ;check for * lists, simplify
 												(if (= expoy expox) (simplifydiv basex basey) (list '/ x y))
-											true (list '/ x y)
+											:else (list '/ x y)
 								)
 								(list '/ x y) ;else
 							)
@@ -203,6 +203,6 @@
 				(= x 1) 1
 				(= x 0) 0
 				(= y 0) 1
-				true (list 'POW x y) ;default return
+				:else (list 'POW x y) ;default return
 	)
 )
